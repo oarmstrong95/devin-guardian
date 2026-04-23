@@ -1,0 +1,4 @@
+services:
+  guardian:
+    build: .
+    env_file: .env
