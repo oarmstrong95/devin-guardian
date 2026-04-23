@@ -13,7 +13,7 @@ jobs:
       - name: Run Guardian
         run: docker compose run --rm guardian
         env:
-          DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
+          DEVIN_TOKEN: ${{ secrets.DEVIN_TOKEN }}
           DEVIN_ORG_ID: ${{ secrets.DEVIN_ORG_ID }}
           TARGET_REPO: ${{ vars.TARGET_REPO || 'oarmstrong95/superset' }}
           TARGET_REPO_URL: ${{ vars.TARGET_REPO_URL || 'https://github.com/oarmstrong95/superset' }}
