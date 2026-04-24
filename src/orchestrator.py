@@ -12,17 +12,18 @@ from src import config, prompts
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("guardian")
 
-PLAYBOOK_API = "https://api.devin.ai/v1/playbooks"
-
-
 def _headers() -> dict:
     return {"Authorization": f"Bearer {config.DEVIN_API_KEY}", "Content-Type": "application/json"}
 
 
+def _playbook_url() -> str:
+    return f"{config.DEVIN_API_BASE}/organizations/{config.DEVIN_ORG_ID}/playbooks"
+
+
 def _list_playbooks() -> list[dict]:
-    resp = requests.get(PLAYBOOK_API, headers=_headers(), timeout=30)
+    resp = requests.get(_playbook_url(), headers=_headers(), timeout=30)
     resp.raise_for_status()
-    return resp.json().get("playbooks", [])
+    return resp.json().get("items", [])
 
 
 def _ensure_playbook(title: str, body: str, macro: str) -> str:
@@ -31,7 +32,7 @@ def _ensure_playbook(title: str, body: str, macro: str) -> str:
     if existing:
         pb = existing[0]
         if pb.get("body") != body:
-            url = f"{PLAYBOOK_API}/{pb['playbook_id']}"
+            url = f"{_playbook_url()}/{pb['playbook_id']}"
             requests.put(url, json={"title": title, "body": body, "macro": macro},
                          headers=_headers(), timeout=30).raise_for_status()
             log.info("Updated playbook %s (%s)", macro, pb["playbook_id"])
@@ -39,7 +40,7 @@ def _ensure_playbook(title: str, body: str, macro: str) -> str:
             log.info("Playbook %s up to date (%s)", macro, pb["playbook_id"])
         return pb["playbook_id"]
 
-    resp = requests.post(PLAYBOOK_API, json={"title": title, "body": body, "macro": macro},
+    resp = requests.post(_playbook_url(), json={"title": title, "body": body, "macro": macro},
                          headers=_headers(), timeout=30)
     resp.raise_for_status()
     pid = resp.json()["playbook_id"]
